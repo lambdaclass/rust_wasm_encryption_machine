@@ -1,4 +1,47 @@
+use rsa::{RsaPrivateKey, RsaPublicKey, PaddingScheme};
+use serde::{Serialize, Deserialize};
 use wasm_bindgen::prelude::*;
+
+#[derive(Serialize, Deserialize)]
+struct RSAKeyPair {
+    public_key: RsaPublicKey,
+    private_key: RsaPrivateKey,
+}
+
+#[wasm_bindgen]
+pub fn generate_key_pair(bits: usize) -> String {
+    let rng = &mut rand::thread_rng();
+    let private_key = RsaPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
+    let public_key = RsaPublicKey::from(&private_key);
+    let key_pair = RSAKeyPair {private_key, public_key};
+    serde_json::to_string(&key_pair).unwrap()
+}
+
+#[wasm_bindgen]
+pub fn encrypt(public_key: &str, data: &[u8]) -> Vec<u8> {
+    let public_key: RsaPublicKey = serde_json::from_str(public_key).unwrap();
+    public_key.encrypt(PaddingScheme::PKCS1v15Encrypt, &data).unwrap()
+}
+
+#[wasm_bindgen]
+pub fn decrypt(private_key: &str, data: &[u8]) -> Vec<u8> {
+    let private_key: RsaPrivateKey = serde_json::from_str(private_key).unwrap();
+    private_key.decrypt(PaddingScheme::PKCS1v15, data).expect("Failed to decrypt")
+}
+
+
+#[wasm_bindgen]
+pub fn sign(private_key: &str, data: &[u8]) -> Vec<u8> {
+    let private_key: RsaPrivateKey = serde_json::from_str(private_key).unwrap();
+    private_key.sign(PaddingScheme::PKCS1v15Encrypt, &data).unwrap()
+} 
+
+// TODO: Verify signature
+#[wasm_bindgen]
+pub fn verify_sign(public_key: &str, signature: &[u8]) -> bool {
+    let public_key: RsaPublicKey = serde_json::from_str(public_key).unwrap();
+    public_key.verify(PaddingScheme::PKCS1v15Encrypt, &data, &signature).unwrap()
+}
 
 // Called when the wasm module is instantiated
 #[wasm_bindgen(start)]
@@ -18,16 +61,7 @@ pub fn main() -> Result<(), JsValue> {
     Ok(())
 }
 
-#[wasm_bindgen]
-pub fn add(a: u32, b: u32) -> u32 {
-    a + b
-}
-
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
-    }
+    // TODO: Make some tests
 }
