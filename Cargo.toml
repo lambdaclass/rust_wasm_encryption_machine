@@ -1,0 +1,23 @@
+[package]
+name = "rust_wasm_playground"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies.wasm-bindgen]
+version = "0.2.80"
+
+[dependencies.web-sys]
+version = "0.3"
+features = [
+	'Document',
+  	'Element',
+  	'HtmlElement',
+  	'Node',
+  	'Window',
+]
+
+[profile.release]
+lto = true
