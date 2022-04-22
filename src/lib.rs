@@ -69,6 +69,8 @@ pub fn main() -> Result<(), JsValue> {
     rsa_text_decrypt.set_class_name("rsa");
     let div_inputs = document.create_element("div")?;
 
+    // Encrypt/Decrypt Inputs
+
     // Create textbox for input
     let input_textbox = document.create_element("textarea")?;
     input_textbox.set_attribute("placeholder", "Enter message...")?;
@@ -86,6 +88,8 @@ pub fn main() -> Result<(), JsValue> {
     decrypted_textbox.set_attribute("placeholder", "Decrypted Message")?;
     decrypted_textbox.set_attribute("disabled", "")?;
     decrypted_textbox.set_attribute("readonly", "")?;
+
+    // TODO: Sign/Verify Inputs
 
     // Add event listeners
     let inbx = input_textbox.clone().dyn_into::<web_sys::HtmlTextAreaElement>()?;
