@@ -26,8 +26,18 @@ p {
 body {
     background-color: gainsboro;
 }
-.result{
+
+.result {
     background-color: transparent;
     border: none;
     text-align: center;
+    outline: none;
+    resize: none;
+    margin: auto;
+    height: 8rem;
+}
+
+.result[placeholder] {
+    display: flex;
+    align-items: center;
 }
