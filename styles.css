@@ -26,3 +26,8 @@ p {
 body {
     background-color: gainsboro;
 }
+.result{
+    background-color: transparent;
+    border: none;
+    text-align: center;
+}

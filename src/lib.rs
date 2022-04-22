@@ -48,6 +48,54 @@ pub fn verify_sign(public_key: &str, data: &[u8], signature: &[u8]) -> bool {
 // Called when the wasm module is instantiated
 #[wasm_bindgen(start)]
 pub fn main() -> Result<(), JsValue> {
+    // Use `web_sys`'s global `window` function to get a handle on the global
+    // window object.
+    let window = web_sys::window().expect("no global `window` exists");
+    let document = window.document().expect("should have a document on window");
+    let body = document.body().expect("document should have a body");
+
+    // Key Pair Initialization
+    // TODO: remove unwrap
+    let pk_pair = generate_key_pair(1024).unwrap();
+    web_sys::console::log_1(&"key pair generated".into());
+
+    // Manufacture the element we're gonna append
+    let val = document.create_element("p")?;
+    val.set_inner_html("Welcome to the Encryption Machine");
+
+    let rsa_text_encrypt = document.create_element("p")?;
+    rsa_text_encrypt.set_inner_html("RSA ENCRYPT ->");
+    rsa_text_encrypt.set_class_name("rsa");
+    let rsa_text_decrypt = document.create_element("p")?;
+    rsa_text_decrypt.set_inner_html("RSA DECRYPT ->");
+    rsa_text_decrypt.set_class_name("rsa");
+    let div_inputs = document.create_element("div")?;
+    // Create textbox for input
+    let input_textbox = document.create_element("textarea")?;
+    // Create textbox for encrypted input
+    let encrypted_textbox = document.create_element("textarea")?;
+    // Create textbox for decrypted input
+    let decrypted_textbox = document.create_element("textarea")?;
+    decrypted_textbox.set_class_name("result");
+
+
+    input_textbox.set_attribute("placeholder", "Enter message...")?;
+    input_textbox.set_attribute("maxlength", "117")?;
+    encrypted_textbox.set_attribute("placeholder", "Encrypted Message")?;
+    encrypted_textbox.set_attribute("readonly", "")?;
+    decrypted_textbox.set_attribute("placeholder", "Decrypted Message")?;
+    decrypted_textbox.set_attribute("readonly", "")?;
+
+
+    // Append to DOM
+    body.append_child(&val)?;
+    body.append_child(&div_inputs)?;
+    div_inputs.append_child(&input_textbox)?;
+    div_inputs.append_child(&rsa_text_encrypt)?;
+    div_inputs.append_child(&encrypted_textbox)?;
+    div_inputs.append_child(&rsa_text_decrypt)?;
+    div_inputs.append_child(&decrypted_textbox)?;
+    
     Ok(())
 }
 
