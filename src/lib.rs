@@ -36,7 +36,7 @@ pub fn sign(private_key: &str, data: &[u8]) -> Result<Vec<u8>, JsError> {
 } 
 
 #[wasm_bindgen]
-pub fn verify_sign(public_key: &str, data: &[u8], signature: &[u8]) -> bool {
+pub fn verify_sign(public_key: &str, data: &[u8], signature: &[u8]) -> Result<(), JsError> {
     let public_key : RsaPublicKey = serde_json::from_str(&public_key).unwrap();
     Ok(_verify_sign(&public_key, data, signature)?)
 }
