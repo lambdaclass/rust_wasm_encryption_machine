@@ -84,6 +84,7 @@ pub fn main() -> Result<(), JsValue> {
     encrypted_textbox.set_attribute("placeholder", "Encrypted Message")?;
     encrypted_textbox.set_attribute("readonly", "")?;
     decrypted_textbox.set_attribute("placeholder", "Decrypted Message")?;
+    decrypted_textbox.set_attribute("disabled", "")?;
     decrypted_textbox.set_attribute("readonly", "")?;
 
     // Add event listeners
