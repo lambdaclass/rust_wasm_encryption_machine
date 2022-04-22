@@ -41,8 +41,6 @@ pub fn verify_sign(public_key: &str, data: &[u8], signature: &[u8]) -> bool {
     Ok(_verify_sign(&public_key, data, signature)?)
 }
 
-
-
 // Called when the wasm module is instantiated
 #[wasm_bindgen(start)]
 pub fn main() -> Result<(), JsValue> {
