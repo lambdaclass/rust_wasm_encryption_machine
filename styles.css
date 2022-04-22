@@ -1,0 +1,28 @@
+textarea {
+    width: 30em;
+    height: 15em;
+}
+
+div {
+    display: flex;
+    justify-content: center;
+    justify-content: space-evenly;
+}
+
+.rsa {
+    align-self: center;
+}
+
+p {
+    text-align: center;
+    color: black;
+    font-size: 2rem;
+}
+
+.rsa {
+    font-size: 1rem;
+}
+
+body {
+    background-color: gainsboro;
+}
