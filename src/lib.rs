@@ -70,19 +70,21 @@ pub fn main() -> Result<(), JsValue> {
     rsa_text_decrypt.set_inner_html("RSA DECRYPT ->");
     rsa_text_decrypt.set_class_name("rsa");
     let div_inputs = document.create_element("div")?;
+
     // Create textbox for input
     let input_textbox = document.create_element("textarea")?;
+    input_textbox.set_attribute("placeholder", "Enter message...")?;
+    input_textbox.set_attribute("maxlength", "117")?;
+
     // Create textbox for encrypted input
     let encrypted_textbox = document.create_element("textarea")?;
+    encrypted_textbox.set_class_name("encrypted_message");
+    encrypted_textbox.set_attribute("placeholder", "Encrypted Message")?;
+    encrypted_textbox.set_attribute("readonly", "")?;
+
     // Create textbox for decrypted input
     let decrypted_textbox = document.create_element("textarea")?;
     decrypted_textbox.set_class_name("result");
-
-
-    input_textbox.set_attribute("placeholder", "Enter message...")?;
-    input_textbox.set_attribute("maxlength", "117")?;
-    encrypted_textbox.set_attribute("placeholder", "Encrypted Message")?;
-    encrypted_textbox.set_attribute("readonly", "")?;
     decrypted_textbox.set_attribute("placeholder", "Decrypted Message")?;
     decrypted_textbox.set_attribute("disabled", "")?;
     decrypted_textbox.set_attribute("readonly", "")?;
