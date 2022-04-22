@@ -86,6 +86,25 @@ pub fn main() -> Result<(), JsValue> {
     decrypted_textbox.set_attribute("placeholder", "Decrypted Message")?;
     decrypted_textbox.set_attribute("readonly", "")?;
 
+    // Add event listeners
+    let inbx = input_textbox.clone().dyn_into::<web_sys::HtmlTextAreaElement>()?;
+    let encinbx = encrypted_textbox.clone().dyn_into::<web_sys::HtmlTextAreaElement>()?;
+    let decinbx = decrypted_textbox.clone().dyn_into::<web_sys::HtmlTextAreaElement>()?;
+    let handler = Closure::wrap(Box::new(move |_: web_sys::InputEvent| {
+        let hash_input = inbx.value();
+        web_sys::console::log_1(&"changed".into());
+
+        // TODO: remove unwrap
+        let hashed_input = _encrypt(&pk_pair.public_key, hash_input.as_bytes()).unwrap();      
+        let hashed_input = base64::encode(hashed_input);
+        
+        let decrypted_input = base64::decode(hashed_input.clone()).unwrap();
+        let decrypted_input = _decrypt(&pk_pair.private_key, &decrypted_input).unwrap();
+        encinbx.set_value(&hashed_input);
+        decinbx.set_value(&String::from_utf8_lossy(&decrypted_input));
+    }) as Box<dyn FnMut(_)>);
+    input_textbox.add_event_listener_with_callback("input", handler.as_ref().unchecked_ref())?;
+    handler.forget();
 
     // Append to DOM
     body.append_child(&val)?;
