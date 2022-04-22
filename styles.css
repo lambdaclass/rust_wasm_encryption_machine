@@ -1,4 +1,4 @@
-textarea {
+textarea:not(:last-child) {
     width: 30em;
     height: 15em;
 }
