@@ -26,21 +26,19 @@ pub fn encrypt(public_key: &str, data: &[u8]) -> Result<Vec<u8>, JsError> {
 #[wasm_bindgen]
 pub fn decrypt(private_key: &str, data: &[u8]) -> Result<Vec<u8>, JsError> {
     let private_key : RsaPrivateKey = serde_json::from_str(&private_key).unwrap();
-    let decripted = _decrypt(&private_key, data)?;
-    Ok(decripted)
+    Ok(_decrypt(&private_key, data)?)
 }
 
 #[wasm_bindgen]
 pub fn sign(private_key: &str, data: &[u8]) -> Result<Vec<u8>, JsError> {
     let private_key : RsaPrivateKey = serde_json::from_str(&private_key).unwrap();
-    let signature = _sign(&private_key, data)?;
-    Ok(signature)
+    Ok(_sign(&private_key, data)?)
 } 
 
 #[wasm_bindgen]
 pub fn verify_sign(public_key: &str, data: &[u8], signature: &[u8]) -> bool {
     let public_key : RsaPublicKey = serde_json::from_str(&public_key).unwrap();
-    _verify_sign(&public_key, data, signature).is_ok()
+    Ok(_verify_sign(&public_key, data, signature)?)
 }
 
 
