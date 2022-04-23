@@ -1,6 +1,6 @@
-# rust_wasm_playground
+# Rust WASM Encryption machine
 
-# How to run
+## How to run
 
 
 Run the following command in the terminal:
