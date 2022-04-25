@@ -86,26 +86,37 @@ fn encrypt_ppm_image(image_data: &[u8], public_key: &rsa::RsaPublicKey) -> Vec<u
     encrypted_image
 }
 
-fn build_encrypted_image_buffer(header: PpmHeader, encrypted_image: Vec<u8>) -> Vec<u8> {
-    let new_header_width = (2 * header.width).to_string();
-    let new_header_height = (2 * header.height).to_string();
-    let new_header_max_color_value = header.max_color_value.to_string();
+fn decrypt_ppm_image(image_data: &[u8], private_key: &rsa::RsaPrivateKey) -> Vec<u8> {
+    let decrypted_image = image_data
+        .chunks(128)
+        .flat_map(|chunk| {
+            _decrypt(&private_key, chunk).unwrap()
+        })
+        .collect::<Vec<u8>>();
+    
+    decrypted_image
+}
+
+fn build_image_buffer(header: PpmHeader, encrypted_image: Vec<u8>) -> Vec<u8> {
+    let header_width = (2 * header.width).to_string();
+    let header_height = (2 * header.height).to_string();
+    let header_max_color_value = header.max_color_value.to_string();
     
     let mut resulting_buffer: Vec<u8> = vec![
         header.magic_number[0], header.magic_number[1], NEWLINE
     ];
 
-    for c in new_header_width.chars() {
+    for c in header_width.chars() {
         resulting_buffer.push(c as u8);
     }
     resulting_buffer.push(SPACE);
 
-    for c in new_header_height.chars() {
+    for c in header_height.chars() {
         resulting_buffer.push(c as u8);
     }
     resulting_buffer.push(NEWLINE);
 
-    for c in new_header_max_color_value.chars() {
+    for c in header_max_color_value.chars() {
         resulting_buffer.push(c as u8);
     }
     resulting_buffer.push(NEWLINE);
@@ -135,12 +146,35 @@ fn main() {
     let encrypted_image = encrypt_ppm_image(&image_data, &keys.public_key);
 
     println!("DEBUG: Building buffer");
-    let resulting_buffer = build_encrypted_image_buffer(header, encrypted_image);
+    let resulting_buffer = build_image_buffer(header, encrypted_image);
         
     println!("DEBUG: Writing file");
     // Save file raw data in a txt file
     let mut file = File::create("src/encrypted_image.ppm").unwrap();
     file.write_all(&resulting_buffer[..=resulting_buffer.len()-1]).unwrap();
+
+    /**************************************************************************/
+
+    println!("DEBUG: Opening encrypted file");
+    let mut file = File::open("src/encrypted_image.ppm").unwrap();
+
+    println!("DEBUG: Reading encrypted file");
+    let mut data = Vec::new();
+    file.read_to_end(&mut data).unwrap();
+
+    println!("DEBUG: Parsing encrypted data");
+    let (header, image_data) = read_ppm_image(&data);
+
+    println!("DEBUG: Decrypting data");
+    let decrypted_image = decrypt_ppm_image(&image_data, &keys.private_key);
+
+    println!("DEBUG: Building decrypted buffer");
+    let decrypted_buffer = build_image_buffer(header, decrypted_image);
+
+    println!("DEBUG: Writing decrypted file");
+    // Save file raw data in a txt file
+    let mut file = File::create("src/decrypted_image.ppm").unwrap();
+    file.write_all(&decrypted_buffer[..=decrypted_buffer.len()-1]).unwrap();
 }
 
 #[cfg(test)]
@@ -159,5 +193,23 @@ mod tests {
         assert_eq!(header.width, 640);
         assert_eq!(header.height, 426);
         assert_eq!(header.max_color_value, 255);
+    }
+
+    #[test]
+    #[ignore = "Not Implemented"]
+    fn input_image_data_is_not_equal_to_encrypted_image_data() {
+
+    }
+
+    #[test]
+    #[ignore = "Not Implemented"]
+    fn encrypted_image_data_is_not_equal_to_decrypted_image_data() {
+
+    }
+
+    #[test]
+    #[ignore = "Not Implemented"]
+    fn encrypted_image_data_is_equal_to_decrypted_image_data() {
+
     }
 }
