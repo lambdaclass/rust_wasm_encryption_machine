@@ -32,17 +32,17 @@ impl PpmHeader {
         println!("DEBUG: {:?} (magic number)", &[file_data[0], file_data[1]]);
         let magic_number = [file_data[0], file_data[1]];
         // 1 byte of whitespace
-        let mut i = next_until(3, &[SPACE, CARRIAGE_RETURN, NEWLINE], &file_data);
+        let mut i = next_until(3, &[SPACE, CARRIAGE_RETURN, NEWLINE], file_data);
         println!("DEBUG: {:?} (width)", &file_data[3..i]);
         let width = atoi::atoi::<usize>(&file_data[3..i]).unwrap();
         // 1 byte of whitespace
         i += 1;
-        let mut j = next_until(i, &[SPACE, CARRIAGE_RETURN, NEWLINE], &file_data);
+        let mut j = next_until(i, &[SPACE, CARRIAGE_RETURN, NEWLINE], file_data);
         println!("DEBUG: {:?} (height)", &file_data[i..j]);
         let height = atoi::atoi::<usize>(&file_data[i..j]).unwrap();
         // 1 byte of whitespace
         i = j+1;
-        j = next_until(i, &[SPACE, CARRIAGE_RETURN, NEWLINE], &file_data);
+        j = next_until(i, &[SPACE, CARRIAGE_RETURN, NEWLINE], file_data);
         println!("DEBUG: {:?} (max_color_value)", &file_data[i..j]);
         let max_color_value = atoi::atoi::<u8>(&file_data[i..j]).unwrap();
         // 1 byte of whitespace
@@ -64,7 +64,7 @@ fn next_until(from: usize, to: &[u8], data: &[u8]) -> usize {
         }
         i += 1;
     }
-    return i;
+    i
 }
 
 fn read_ppm_image(buffer: &[u8]) -> (PpmHeader, Vec<u8>) {
@@ -79,7 +79,7 @@ fn encrypt_ppm_image(image_data: &[u8], public_key: &rsa::RsaPublicKey) -> Vec<u
     let encrypted_image = image_data
         .chunks(32)
         .flat_map(|chunk| {
-            _encrypt(&public_key, chunk).unwrap()
+            _encrypt(public_key, chunk).unwrap()
         })
         .collect::<Vec<u8>>();
 
@@ -90,7 +90,7 @@ fn decrypt_ppm_image(image_data: &[u8], private_key: &rsa::RsaPrivateKey) -> Vec
     let decrypted_image = image_data
         .chunks(128)
         .flat_map(|chunk| {
-            _decrypt(&private_key, chunk).unwrap()
+            _decrypt(private_key, chunk).unwrap()
         })
         .collect::<Vec<u8>>();
     
