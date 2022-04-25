@@ -55,6 +55,18 @@ pub fn main() -> Result<(), JsValue> {
     let pk_pair = generate_key_pair(1024).unwrap();
     web_sys::console::log_1(&"key pair generated".into());
 
+    // show generated key
+    let div_keys = document.create_element("div")?;
+    let (pub_key, priv_key) = (&pk_pair.public_key, &pk_pair.private_key);
+    let pub_key_label = document.create_element("label")?;
+    let priv_key_label = document.create_element("label")?;
+    let pub_pem = pkcs1::EncodeRsaPublicKey::to_pkcs1_pem(pub_key, pkcs1::LineEnding::LF).unwrap();
+    let priv_pem = &*(pkcs1::EncodeRsaPrivateKey::to_pkcs1_pem(priv_key, pkcs1::LineEnding::LF).unwrap());
+    pub_key_label.set_inner_html(&format!("{:?}", &pub_pem.replace("\n", "<br>")).replace("\"", ""));
+    priv_key_label.set_inner_html(&format!("{:?}", &priv_pem.replace("\n", "<br>")).replace("\"", ""));
+    div_keys.append_child(&pub_key_label)?;
+    div_keys.append_child(&priv_key_label)?;
+
     // Manufacture the element we're gonna append
     let val = document.create_element("p")?;
     val.set_inner_html("Welcome to the Encryption Machine");
@@ -111,6 +123,7 @@ pub fn main() -> Result<(), JsValue> {
 
     // Append to DOM
     body.append_child(&val)?;
+    body.append_child(&div_keys)?;
     body.append_child(&div_inputs)?;
     div_inputs.append_child(&input_textbox)?;
     div_inputs.append_child(&rsa_text_encrypt)?;
