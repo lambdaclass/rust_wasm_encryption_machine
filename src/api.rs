@@ -1,7 +1,7 @@
 use rsa::{errors::Error, PaddingScheme, PublicKey, RsaPrivateKey, RsaPublicKey};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct RSAKeyPair {
     pub public_key: RsaPublicKey,
     pub private_key: RsaPrivateKey,
