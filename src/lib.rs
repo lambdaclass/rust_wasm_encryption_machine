@@ -1,4 +1,4 @@
-use rsa::{RsaPublicKey, RsaPrivateKey};
+use rsa::{RsaPrivateKey, RsaPublicKey};
 use wasm_bindgen::{prelude::*, JsCast};
 
 mod api;
@@ -13,31 +13,31 @@ pub fn generate_key_pair_str(bits: usize) -> Result<String, JsError> {
         }
     } else {
         Err(JsError::new("Failed to generate key pair"))
-    }   
+    }
 }
 
 #[wasm_bindgen]
 pub fn encrypt(public_key: &str, data: &[u8]) -> Result<Vec<u8>, JsError> {
-    let public_key: RsaPublicKey = serde_json::from_str(&public_key).unwrap();
+    let public_key: RsaPublicKey = serde_json::from_str(public_key).unwrap();
     let encrypted = _encrypt(&public_key, data)?;
     Ok(encrypted)
 }
 
 #[wasm_bindgen]
 pub fn decrypt(private_key: &str, data: &[u8]) -> Result<Vec<u8>, JsError> {
-    let private_key : RsaPrivateKey = serde_json::from_str(&private_key).unwrap();
+    let private_key: RsaPrivateKey = serde_json::from_str(private_key).unwrap();
     Ok(_decrypt(&private_key, data)?)
 }
 
 #[wasm_bindgen]
 pub fn sign(private_key: &str, data: &[u8]) -> Result<Vec<u8>, JsError> {
-    let private_key : RsaPrivateKey = serde_json::from_str(&private_key).unwrap();
+    let private_key: RsaPrivateKey = serde_json::from_str(private_key).unwrap();
     Ok(_sign(&private_key, data)?)
-} 
+}
 
 #[wasm_bindgen]
 pub fn verify_sign(public_key: &str, data: &[u8], signature: &[u8]) -> Result<(), JsError> {
-    let public_key : RsaPublicKey = serde_json::from_str(&public_key).unwrap();
+    let public_key: RsaPublicKey = serde_json::from_str(public_key).unwrap();
     Ok(_verify_sign(&public_key, data, signature)?)
 }
 
@@ -61,9 +61,12 @@ pub fn main() -> Result<(), JsValue> {
     let pub_key_label = document.create_element("label")?;
     let priv_key_label = document.create_element("label")?;
     let pub_pem = pkcs1::EncodeRsaPublicKey::to_pkcs1_pem(pub_key, pkcs1::LineEnding::LF).unwrap();
-    let priv_pem = &*(pkcs1::EncodeRsaPrivateKey::to_pkcs1_pem(priv_key, pkcs1::LineEnding::LF).unwrap());
-    pub_key_label.set_inner_html(&format!("{:?}", &pub_pem.replace("\n", "<br>")).replace("\"", ""));
-    priv_key_label.set_inner_html(&format!("{:?}", &priv_pem.replace("\n", "<br>")).replace("\"", ""));
+    let priv_pem =
+        &*(pkcs1::EncodeRsaPrivateKey::to_pkcs1_pem(priv_key, pkcs1::LineEnding::LF).unwrap());
+    pub_key_label
+        .set_inner_html(&format!("{:?}", &pub_pem.replace('\n', "<br>")).replace('\"', ""));
+    priv_key_label
+        .set_inner_html(&format!("{:?}", &priv_pem.replace('\n', "<br>")).replace('\"', ""));
     div_keys.append_child(&pub_key_label)?;
     div_keys.append_child(&priv_key_label)?;
 
@@ -102,17 +105,23 @@ pub fn main() -> Result<(), JsValue> {
     // TODO: Sign/Verify Inputs
 
     // Add event listeners
-    let inbx = input_textbox.clone().dyn_into::<web_sys::HtmlTextAreaElement>()?;
-    let encinbx = encrypted_textbox.clone().dyn_into::<web_sys::HtmlTextAreaElement>()?;
-    let decinbx = decrypted_textbox.clone().dyn_into::<web_sys::HtmlTextAreaElement>()?;
+    let inbx = input_textbox
+        .clone()
+        .dyn_into::<web_sys::HtmlTextAreaElement>()?;
+    let encinbx = encrypted_textbox
+        .clone()
+        .dyn_into::<web_sys::HtmlTextAreaElement>()?;
+    let decinbx = decrypted_textbox
+        .clone()
+        .dyn_into::<web_sys::HtmlTextAreaElement>()?;
     let handler = Closure::wrap(Box::new(move |_: web_sys::InputEvent| {
         let hash_input = inbx.value();
         web_sys::console::log_1(&"changed".into());
 
         // TODO: remove unwrap
-        let hashed_input = _encrypt(&pk_pair.public_key, hash_input.as_bytes()).unwrap();      
+        let hashed_input = _encrypt(&pk_pair.public_key, hash_input.as_bytes()).unwrap();
         let hashed_input = base64::encode(hashed_input);
-        
+
         let decrypted_input = base64::decode(hashed_input.clone()).unwrap();
         let decrypted_input = _decrypt(&pk_pair.private_key, &decrypted_input).unwrap();
         encinbx.set_value(&hashed_input);
@@ -130,7 +139,7 @@ pub fn main() -> Result<(), JsValue> {
     div_inputs.append_child(&encrypted_textbox)?;
     div_inputs.append_child(&rsa_text_decrypt)?;
     div_inputs.append_child(&decrypted_textbox)?;
-    
+
     Ok(())
 }
 

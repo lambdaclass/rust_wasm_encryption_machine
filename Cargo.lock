@@ -330,6 +330,7 @@ dependencies = [
  "anyhow",
  "base64",
  "getrandom",
+ "pkcs1",
  "rand",
  "rsa",
  "serde",
