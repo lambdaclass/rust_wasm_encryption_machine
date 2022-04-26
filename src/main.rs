@@ -6,6 +6,7 @@ use api::*;
 const SPACE: u8 = b' ';
 const NEWLINE: u8 = b'\n';
 const CARRIAGE_RETURN: u8 = b'\r';
+const WHITESPACES: [u8; 3] = [SPACE, NEWLINE, CARRIAGE_RETURN];
 
 // Each PPM image consists of the following:
 //      A "magic number" for identifying the file type. A ppm image's magic number is the two characters "P6".
@@ -32,17 +33,17 @@ impl PpmHeader {
         println!("DEBUG: {:?} (magic number)", &[file_data[0], file_data[1]]);
         let magic_number = [file_data[0], file_data[1]];
         // 1 byte of whitespace
-        let mut i = next_until(3, &[SPACE, CARRIAGE_RETURN, NEWLINE], file_data);
+        let mut i = next_until(3, &WHITESPACES, file_data);
         println!("DEBUG: {:?} (width)", &file_data[3..i]);
         let width = atoi::atoi::<usize>(&file_data[3..i]).unwrap();
         // 1 byte of whitespace
         i += 1;
-        let mut j = next_until(i, &[SPACE, CARRIAGE_RETURN, NEWLINE], file_data);
+        let mut j = next_until(i, &WHITESPACES, file_data);
         println!("DEBUG: {:?} (height)", &file_data[i..j]);
         let height = atoi::atoi::<usize>(&file_data[i..j]).unwrap();
         // 1 byte of whitespace
         i = j+1;
-        j = next_until(i, &[SPACE, CARRIAGE_RETURN, NEWLINE], file_data);
+        j = next_until(i, &WHITESPACES, file_data);
         println!("DEBUG: {:?} (max_color_value)", &file_data[i..j]);
         let max_color_value = atoi::atoi::<u8>(&file_data[i..j]).unwrap();
         // 1 byte of whitespace
@@ -69,7 +70,7 @@ fn next_until(from: usize, to: &[u8], data: &[u8]) -> usize {
 
 fn read_ppm_image(buffer: &[u8]) -> (PpmHeader, Vec<u8>) {
     let (header, skip) = PpmHeader::read_from(buffer);
-    let image_data = buffer[skip..].iter().copied().filter(|c| *c != SPACE).collect::<Vec<u8>>();
+    let image_data = buffer[skip..].iter().copied().filter(|c| !(WHITESPACES.contains(c))).collect::<Vec<u8>>();
     (header, image_data)
 }
 
@@ -98,8 +99,8 @@ fn decrypt_ppm_image(image_data: &[u8], private_key: &rsa::RsaPrivateKey) -> Vec
 }
 
 fn build_image_buffer(header: PpmHeader, encrypted_image: Vec<u8>) -> Vec<u8> {
-    let header_width = (2 * header.width).to_string();
-    let header_height = (2 * header.height).to_string();
+    let header_width = header.width.to_string();
+    let header_height = header.height.to_string();
     let header_max_color_value = header.max_color_value.to_string();
     
     let mut resulting_buffer: Vec<u8> = vec![
@@ -130,7 +131,7 @@ fn build_image_buffer(header: PpmHeader, encrypted_image: Vec<u8>) -> Vec<u8> {
 
 fn main() {
     println!("DEBUG: Opening file");
-    let mut file = File::open("src/image.ppm").unwrap();
+    let mut file = File::open("assets/image.ppm").unwrap();
 
     println!("DEBUG: Reading file");
     let mut data = Vec::new();
@@ -146,17 +147,25 @@ fn main() {
     let encrypted_image = encrypt_ppm_image(&image_data, &keys.public_key);
 
     println!("DEBUG: Building buffer");
-    let resulting_buffer = build_image_buffer(header, encrypted_image);
+    let resulting_buffer = build_image_buffer(
+        PpmHeader { 
+            magic_number: header.magic_number, 
+            width: 2 * header.width, 
+            height: 2 * header.height, 
+            max_color_value: header.max_color_value 
+        }, 
+        encrypted_image
+    );
         
     println!("DEBUG: Writing file");
     // Save file raw data in a txt file
-    let mut file = File::create("src/encrypted_image.ppm").unwrap();
-    file.write_all(&resulting_buffer[..=resulting_buffer.len()-1]).unwrap();
+    let mut file = File::create("assets/encrypted_image.ppm").unwrap();
+    file.write_all(&resulting_buffer[..resulting_buffer.len()]).unwrap();
 
     /**************************************************************************/
 
     println!("DEBUG: Opening encrypted file");
-    let mut file = File::open("src/encrypted_image.ppm").unwrap();
+    let mut file = File::open("assets/encrypted_image.ppm").unwrap();
 
     println!("DEBUG: Reading encrypted file");
     let mut data = Vec::new();
@@ -169,12 +178,20 @@ fn main() {
     let decrypted_image = decrypt_ppm_image(&image_data, &keys.private_key);
 
     println!("DEBUG: Building decrypted buffer");
-    let decrypted_buffer = build_image_buffer(header, decrypted_image);
+    let decrypted_buffer = build_image_buffer(
+        PpmHeader { 
+            magic_number: header.magic_number, 
+            width: header.width / 2, 
+            height: header.height / 2, 
+            max_color_value: header.max_color_value,
+        }, 
+        decrypted_image
+    );
 
     println!("DEBUG: Writing decrypted file");
     // Save file raw data in a txt file
-    let mut file = File::create("src/decrypted_image.ppm").unwrap();
-    file.write_all(&decrypted_buffer[..=decrypted_buffer.len()-1]).unwrap();
+    let mut file = File::create("assets/decrypted_image.ppm").unwrap();
+    file.write_all(&decrypted_buffer[..decrypted_buffer.len()]).unwrap();
 }
 
 #[cfg(test)]
