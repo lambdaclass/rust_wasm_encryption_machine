@@ -9,6 +9,9 @@ crate-type = ["cdylib"]
 [dev-dependencies.anyhow]
 version = "1.0"
 
+[dependencies.atoi]
+version = "1.0"
+
 [dependencies.serde]
 version = "1.0"
 features = ["derive"]
