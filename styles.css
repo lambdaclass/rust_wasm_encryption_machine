@@ -1,0 +1,45 @@
+textarea:not(:last-child) {
+    width: 30em;
+    height: 15em;
+}
+
+div {
+    display: flex;
+    justify-content: center;
+    justify-content: space-evenly;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.rsa {
+    align-self: center;
+}
+
+p {
+    text-align: center;
+    color: black;
+    font-size: 2rem;
+}
+
+.rsa {
+    font-size: 1rem;
+}
+
+body {
+    background-color: gainsboro;
+}
+
+.result {
+    background-color: transparent;
+    border: none;
+    text-align: center;
+    outline: none;
+    resize: none;
+    margin: auto;
+    height: 8rem;
+}
+
+.result[placeholder] {
+    display: flex;
+    align-items: center;
+}
